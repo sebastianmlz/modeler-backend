@@ -14,12 +14,17 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qsl
 from pathlib import Path
+import sys
 
 # Load environment variables
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# Agregando la carpeta Apps al PYTHONPATH para que Django pueda detectar las apps correctamente.
+sys.path.append(str(BASE_DIR / 'Apps'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -43,6 +48,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
+
+    # Local apps
+    'Apps.common',
+    'Apps.accounts',
+    'Apps.workspace',
+    'Apps.modeling',
+    'Apps.collaboration',
+    'Apps.generation',
+    'Apps.telemetry',
 ]
 
 MIDDLEWARE = [
