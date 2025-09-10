@@ -50,3 +50,9 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Test scripts
+test_auth.py
+
+# Documentation
+"Backend Fase 1 (DRF + JWT + Spectacular).txt"
