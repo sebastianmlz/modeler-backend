@@ -11,6 +11,7 @@ from .viewsets import (
     ProjectMemberViewSet
 )
 
+# Router para workspace endpoints
 router = DefaultRouter()
 router.register(r'organizations', OrganizationViewSet)
 router.register(r'memberships', MembershipViewSet)
@@ -19,5 +20,5 @@ router.register(r'projects', ProjectViewSet)
 router.register(r'project-members', ProjectMemberViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]

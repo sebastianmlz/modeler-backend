@@ -20,10 +20,11 @@ urlpatterns = [
     # Authentication
     path('api/auth/', include('Apps.accounts.urls')),
     
-    # API URLs
-    path('api/organizations/', include('Apps.workspace.urls')),
-    path('api/projects/', include('Apps.workspace.urls')),
-    path('api/diagrams/', include('Apps.modeling.urls')),
+    # Workspace APIs (Organizations & Projects)
+    path('api/', include('Apps.workspace.urls')),
+    
+    # Other APIs
+    path('api/', include('Apps.modeling.urls')),
     path('api/', include('Apps.collaboration.urls')),
     path('api/', include('Apps.telemetry.urls')),
     path('api/', include('Apps.generation.urls')),
