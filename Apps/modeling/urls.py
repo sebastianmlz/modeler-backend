@@ -25,5 +25,5 @@ router.register(r'enum-values', EnumValueViewSet)
 router.register(r'model-relations', ModelRelationViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]

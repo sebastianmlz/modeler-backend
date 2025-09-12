@@ -1,8 +1,12 @@
 """
 Serializers package for modeling app.
 """
-from .diagram_serializer import DiagramSerializer
-from .diagram_version_serializer import DiagramVersionSerializer
+from .diagram_serializer import DiagramSerializer, DiagramUpdateSerializer
+from .diagram_version_serializer import (
+    DiagramVersionSerializer, 
+    DiagramVersionDetailSerializer, 
+    DiagramVersionListSerializer
+)
 from .model_class_serializer import ModelClassSerializer
 from .model_attribute_serializer import ModelAttributeSerializer
 from .model_method_serializer import ModelMethodSerializer
@@ -12,7 +16,10 @@ from .model_relation_serializer import ModelRelationSerializer
 
 __all__ = [
     'DiagramSerializer',
+    'DiagramUpdateSerializer',
     'DiagramVersionSerializer',
+    'DiagramVersionDetailSerializer', 
+    'DiagramVersionListSerializer',
     'ModelClassSerializer',
     'ModelAttributeSerializer',
     'ModelMethodSerializer',

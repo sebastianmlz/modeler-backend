@@ -1,29 +1,66 @@
 """
 ViewSets para telemetría del sistema.
 """
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from ..models import Event, AuditLog, UsageStat, ErrorLog
-from ..serializers import EventSerializer, AuditLogSerializer, UsageStatSerializer, ErrorLogSerializer
+from ..serializers import EventSerializer, EventListSerializer, AuditLogSerializer, UsageStatSerializer, ErrorLogSerializer
 
 
+@extend_schema_view(
+    create=extend_schema(
+        summary="T01 - Registrar evento de telemetría",
+        description="Registra un nuevo evento de actividad del usuario en el sistema.",
+        responses={201: EventSerializer}
+    ),
+    list=extend_schema(
+        summary="T02 - Listar eventos de telemetría",
+        description="Lista eventos de telemetría con filtros opcionales.",
+        responses={200: EventListSerializer(many=True)}
+    ),
+)
 class EventViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestionar eventos de telemetría."""
+    """ViewSet para gestionar eventos de telemetría (T01-T02)."""
     
-    queryset = Event.objects.all()
+    queryset = Event.objects.all().order_by('-ts')
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['type', 'project', 'organization']
+    
+    def get_serializer_class(self):
+        """Usar serializer específico para listado."""
+        if self.action == 'list':
+            return EventListSerializer
+        return EventSerializer
     
     def get_queryset(self):
         """Filtrar eventos por acceso del usuario."""
         user = self.request.user
-        if user.is_superuser:
-            return Event.objects.all()
+        queryset = Event.objects.all().order_by('-ts')
         
-        # Solo eventos relacionados con proyectos accesibles
-        return Event.objects.filter(
+        if user.is_superuser:
+            return queryset
+        
+        # Filtrar por proyectos/organizaciones accesibles al usuario
+        accessible_filters = Q(
             project__organization__membership__user=user,
             project__organization__membership__status='active'
-        )
+        ) | Q(user=user)  # También eventos propios del usuario
+        
+        return queryset.filter(accessible_filters).distinct()
+    
+    def perform_create(self, serializer):
+        """T01 - Asignar usuario actual al crear evento."""
+        # Si no se especifica usuario, usar el actual
+        if 'user' not in serializer.validated_data or not serializer.validated_data['user']:
+            serializer.save(user=self.request.user)
+        else:
+            serializer.save()
 
 
 class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
