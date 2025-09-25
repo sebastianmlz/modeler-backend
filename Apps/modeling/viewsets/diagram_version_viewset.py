@@ -14,11 +14,6 @@ from Apps.modeling.serializers import (
     DiagramVersionDetailSerializer, 
     DiagramVersionListSerializer
 )
-from Apps.modeling.permissions import (
-    CanCreateDiagramVersion, 
-    CanViewDiagramVersion, 
-    CanListDiagramVersions
-)
 from Apps.workspace.models import ProjectMember
 
 
@@ -51,20 +46,6 @@ class DiagramVersionViewSet(viewsets.ModelViewSet):
             return DiagramVersionDetailSerializer
         return DiagramVersionSerializer
     
-    def get_permissions(self):
-        """Asigna permisos específicos según la acción."""
-        if self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated, CanCreateDiagramVersion]
-        elif self.action == 'list':
-            permission_classes = [permissions.IsAuthenticated, CanListDiagramVersions]
-        elif self.action in ['retrieve']:
-            permission_classes = [permissions.IsAuthenticated, CanViewDiagramVersion]
-        else:
-            # Bloquear otras acciones (update, destroy, etc.)
-            permission_classes = [permissions.IsAdminUser]
-        
-        return [permission() for permission in permission_classes]
-    
     def get_queryset(self):
         """Filtra versiones según los permisos del usuario."""
         user = self.request.user
@@ -74,8 +55,7 @@ class DiagramVersionViewSet(viewsets.ModelViewSet):
         
         # Solo versiones de diagramas en proyectos donde el usuario es miembro
         return self.queryset.filter(
-            diagram__project__organization__membership__user=user,
-            diagram__project__organization__membership__status='active'
+            diagram__project__projectmember__user=user
         ).distinct()
     
     @extend_schema(
@@ -113,14 +93,13 @@ class DiagramVersionViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'No diagram specified'}, status=400)
         
         # Obtener el diagrama
-        from Apps.modeling.models import Diagram
         try:
             diagram = Diagram.objects.select_related('project').get(id=diagram_id)
         except Diagram.DoesNotExist:
             return Response({'detail': 'Diagram not found'}, status=404)
 
         # Validar que el usuario sea miembro del proyecto
-        if not ProjectMember.objects.filter(project=diagram.project, user=request.user).exists():
+        if not request.user.is_superuser and not ProjectMember.objects.filter(project=diagram.project, user=request.user).exists():
             return Response({'detail': 'No tienes permisos para guardar versiones en este diagrama'}, status=403)
 
         # Si pasa la validación, sigue con el guardado normal
@@ -179,10 +158,10 @@ class DiagramVersionViewSet(viewsets.ModelViewSet):
         try:
             diagram = Diagram.objects.get(id=diagram_id)
             
-            # Verificar permisos de lectura
-            if not diagram.project.organization.membership_set.filter(
-                user=request.user, status='active'
-            ).exists() and not request.user.is_superuser:
+            # Verificar permisos de lectura - cambiar a membresía del proyecto
+            if not request.user.is_superuser and not ProjectMember.objects.filter(
+                project=diagram.project, user=request.user
+            ).exists():
                 return Response(
                     {'error': 'Sin permisos para acceder a este diagrama'},
                     status=status.HTTP_403_FORBIDDEN
@@ -222,6 +201,17 @@ class DiagramVersionViewSet(viewsets.ModelViewSet):
     )
     def retrieve(self, request, *args, **kwargs):
         """M06 - Obtener versión específica del diagrama."""
+        # Validar permisos para esta versión específica
+        version = self.get_object()
+        
+        if not request.user.is_superuser and not ProjectMember.objects.filter(
+            project=version.diagram.project, user=request.user
+        ).exists():
+            return Response(
+                {'error': 'Sin permisos para acceder a esta versión del diagrama'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         return super().retrieve(request, *args, **kwargs)
     
     def perform_create(self, serializer):

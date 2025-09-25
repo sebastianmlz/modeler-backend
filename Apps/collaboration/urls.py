@@ -18,10 +18,16 @@ router.register(r'locks', lock_viewset.LockViewSet)
 router.register(r'presence', presence_viewset.PresenceViewSet)
 
 urlpatterns = [
-    # Endpoints de membresía de diagramas (primero)
-    path('my-diagrams/', views.my_diagrams, name='my_diagrams'),
+    # Nuevos endpoints organizacionales (mejor UX/UI)
+    path('my-projects/', views.my_projects, name='my_projects'),
+    path('projects/<uuid:project_id>/diagrams/', views.project_diagrams, name='project_diagrams'),
+    
+    # Endpoints de membresía de diagramas 
     path('diagrams/<uuid:diagram_id>/join/', views.join_diagram, name='join_diagram'),
     path('diagrams/<uuid:diagram_id>/members/', views.diagram_members, name='diagram_members'),
+    
+    # Endpoint legacy (mantener por compatibilidad)
+    path('my-diagrams/', views.my_diagrams, name='my_diagrams_legacy'),
 
     # Endpoints de colaboración existentes
     path('', include(router.urls)),
