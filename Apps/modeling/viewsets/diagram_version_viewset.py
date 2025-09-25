@@ -19,6 +19,7 @@ from Apps.modeling.permissions import (
     CanViewDiagramVersion, 
     CanListDiagramVersions
 )
+from Apps.workspace.models import ProjectMember
 
 
 class DiagramVersionViewSet(viewsets.ModelViewSet):
@@ -107,7 +108,22 @@ class DiagramVersionViewSet(viewsets.ModelViewSet):
         }
     )
     def create(self, request, *args, **kwargs):
-        """M04 - Crear versión del diagrama."""
+        diagram_id = request.data.get('diagram_id')
+        if not diagram_id:
+            return Response({'detail': 'No diagram specified'}, status=400)
+        
+        # Obtener el diagrama
+        from Apps.modeling.models import Diagram
+        try:
+            diagram = Diagram.objects.select_related('project').get(id=diagram_id)
+        except Diagram.DoesNotExist:
+            return Response({'detail': 'Diagram not found'}, status=404)
+
+        # Validar que el usuario sea miembro del proyecto
+        if not ProjectMember.objects.filter(project=diagram.project, user=request.user).exists():
+            return Response({'detail': 'No tienes permisos para guardar versiones en este diagrama'}, status=403)
+
+        # Si pasa la validación, sigue con el guardado normal
         return super().create(request, *args, **kwargs)
     
     @extend_schema(

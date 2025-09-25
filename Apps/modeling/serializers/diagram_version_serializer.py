@@ -12,7 +12,7 @@ class DiagramVersionSerializer(serializers.ModelSerializer):
     diagram_id = serializers.UUIDField(write_only=True, required=True)
     created_by_username = serializers.CharField(source='created_by.username', read_only=True)
     diagram_name = serializers.CharField(source='diagram.name', read_only=True)
-    
+
     class Meta:
         model = DiagramVersion
         fields = [
@@ -50,25 +50,24 @@ class DiagramVersionSerializer(serializers.ModelSerializer):
     def validate_diagram_id(self, value):
         """Valida que el diagrama exista y el usuario tenga permisos."""
         user = self.context['request'].user
-        
+
         try:
             diagram = Diagram.objects.get(id=value)
         except Diagram.DoesNotExist:
             raise serializers.ValidationError("El diagrama especificado no existe")
-        
-        # Verificar que el usuario sea miembro de la organización del proyecto
-        from Apps.workspace.models import Membership
-        if not Membership.objects.filter(
-            organization=diagram.project.organization,
-            user=user,
-            status='active'
+
+        # Verificar que el usuario sea miembro del proyecto del diagrama
+        from Apps.workspace.models import ProjectMember
+        if not ProjectMember.objects.filter(
+            project=diagram.project,
+            user=user
         ).exists():
             raise serializers.ValidationError("No tienes permisos para crear versiones en este diagrama")
-        
+
         # Verificar que el diagrama no esté eliminado
-        if diagram.deleted_at is not None:
+        if hasattr(diagram, 'deleted_at') and diagram.deleted_at is not None:
             raise serializers.ValidationError("No se pueden crear versiones de un diagrama eliminado")
-        
+
         return value
 
     def validate_message(self, value):
