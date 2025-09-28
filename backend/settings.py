@@ -102,19 +102,29 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 
-if REDIS_PASSWORD:
-    redis_url = f"redis://default:{REDIS_PASSWORD}@{REDIS_HOST}:6379"
-else:
-    redis_url = f"redis://{REDIS_HOST}:6379"
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [(redis_url, 6379)],
+# Configuración simple: InMemory para producción, Redis para desarrollo
+if os.getenv("RAILWAY_ENVIRONMENT_NAME") == "production" or not DEBUG:
+    # En producción (Railway) usar InMemory
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
         },
-    },
-}
+    }
+else:
+    # En desarrollo local usar Redis
+    if REDIS_PASSWORD:
+        redis_url = f"redis://default:{REDIS_PASSWORD}@{REDIS_HOST}:6379"
+    else:
+        redis_url = f"redis://{REDIS_HOST}:6379"
+
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [redis_url],
+            },
+        },
+    }
 
 
 # Database
