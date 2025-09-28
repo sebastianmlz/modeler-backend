@@ -235,7 +235,7 @@ SPECTACULAR_SETTINGS = {
     'DEFAULT_GENERATOR_CLASS': 'drf_spectacular.generators.SchemaGenerator',
     'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
     'SERVERS': [
-        {'url': 'http://127.0.0.1:8000', 'description': 'Development server'},
+        {'url': 'https://modeler-backend-production.up.railway.app', 'description': 'Production server'},
     ],
 }
 
