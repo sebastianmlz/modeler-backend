@@ -31,12 +31,12 @@ sys.path.append(str(BASE_DIR / 'Apps'))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#yb&do77)aj#p5fd5l!pngr(sos^-o52@nfh3a*5(s1mn3(p@i'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -99,11 +99,19 @@ TEMPLATES = [
 ASGI_APPLICATION = 'backend.asgi.application'
 WSGI_APPLICATION = 'backend.wsgi.application'
 # Channels/Redis configuration
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+
+if REDIS_PASSWORD:
+    redis_url = f"redis://default:{REDIS_PASSWORD}@{REDIS_HOST}:6379"
+else:
+    redis_url = f"redis://{REDIS_HOST}:6379"
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 6379)],  # Cambia si usas Redis en Railway
+            "hosts": [(redis_url, 6379)],
         },
     },
 }
