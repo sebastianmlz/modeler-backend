@@ -42,7 +42,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 # Application definition
 
 INSTALLED_APPS = [
-    'channels',  # Channels debe ir primero
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,20 +50,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
-    # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
     'corsheaders',
     'django_filters',
-    # Local apps
     'Apps.common',
     'Apps.accounts',
     'Apps.workspace',
     'Apps.modeling',
     'Apps.collaboration',
-    'Apps.generation',
-    'Apps.telemetry',
+
 ]
 
 MIDDLEWARE = [

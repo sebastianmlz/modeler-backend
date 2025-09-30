@@ -10,11 +10,6 @@ from Apps.workspace.models import Project
 class DiagramSerializer(serializers.ModelSerializer):
     """
     Serializer para diagramas según especificación Fase 1.
-    
-    Endpoints compatibles:
-    - M01: POST /api/diagrams/ → 201 { id, project, name, current_version, created_by, created_at }
-    - M02: GET /api/diagrams/?project=<uuid> → 200 [ … ]
-    - M03: GET /api/diagrams/{id}/ → 200 { … }
     """
     
     class Meta:

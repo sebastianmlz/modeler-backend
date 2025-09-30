@@ -73,17 +73,6 @@ from ..permissions import IsProjectMemberForDiagram, CanEditDiagram
 class DiagramViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar diagramas según Fase 1.
-    
-    Endpoints implementados:
-    - M01: POST /api/diagrams/ → crear diagrama
-    - M02: GET /api/diagrams/?project=<uuid> → listar diagramas del proyecto
-    - M03: GET /api/diagrams/{id}/ → obtener diagrama
-    - M03: PATCH /api/diagrams/{id}/ → renombrar diagrama
-    - M03: DELETE /api/diagrams/{id}/ → eliminar diagrama (soft delete)
-    
-    Permisos según matriz Fase 1:
-    - Crear/editar/eliminar = miembro del proyecto (editor+)
-    - Leer = cualquier miembro del proyecto
     """
     
     queryset = Diagram.objects.filter(deleted_at__isnull=True)  # Excluir soft deleted
@@ -117,9 +106,6 @@ class DiagramViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Filtrar diagramas según el usuario y proyecto.
-        
-        M02: Requiere parámetro project y lista solo diagramas de ese proyecto
-        donde el usuario es miembro.
         """
         user = self.request.user
         
@@ -183,7 +169,6 @@ class DiagramViewSet(viewsets.ModelViewSet):
     
     # Sobrescribir método no permitido en Fase 1
     def update(self, request, *args, **kwargs):
-        """PUT completo no está en el alcance de Fase 1."""
         return Response(
             {"detail": "Actualización completa de diagramas no implementada en Fase 1. Use PATCH para renombrar."}, 
             status=status.HTTP_501_NOT_IMPLEMENTED

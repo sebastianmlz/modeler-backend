@@ -26,5 +26,4 @@ urlpatterns = [
     # Other APIs
     path('api/', include('Apps.modeling.urls')),
     path('api/', include('Apps.collaboration.urls')),
-    path('api/', include('Apps.telemetry.urls')),
 ]

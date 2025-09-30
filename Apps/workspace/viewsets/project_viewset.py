@@ -52,15 +52,6 @@ from ..permissions import IsProjectMember
 class ProjectViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar proyectos según Fase 1.
-    
-    Endpoints implementados:
-    - W04: POST /api/projects/ → crear proyecto
-    - W05: GET /api/projects/?organization=<uuid> → listar proyectos de una org
-    - W06: GET /api/projects/{id}/ → obtener proyecto
-    
-    Permisos según matriz Fase 1:
-    - Crear = miembro de la Organization (owner/admin/editor)
-    - Leer = cualquier miembro del proyecto
     """
     
     queryset = Project.objects.all()
@@ -84,9 +75,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Filtrar proyectos según el usuario y organización.
-        
-        W05: Requiere parámetro organization y lista solo proyectos de esa org
-        donde el usuario es miembro.
         """
         user = self.request.user
         
@@ -148,21 +136,18 @@ class ProjectViewSet(viewsets.ModelViewSet):
     
     # Sobrescribir métodos no permitidos en Fase 1
     def update(self, request, *args, **kwargs):
-        """PATCH/PUT no están en el alcance de Fase 1."""
         return Response(
             {"detail": "Actualización de proyectos no implementada en Fase 1"}, 
             status=status.HTTP_501_NOT_IMPLEMENTED
         )
     
     def partial_update(self, request, *args, **kwargs):
-        """PATCH no está en el alcance de Fase 1.""" 
         return Response(
             {"detail": "Actualización parcial de proyectos no implementada en Fase 1"},
             status=status.HTTP_501_NOT_IMPLEMENTED
         )
     
     def destroy(self, request, *args, **kwargs):
-        """DELETE no está en el alcance de Fase 1."""
         return Response(
             {"detail": "Eliminación de proyectos no implementada en Fase 1"},
             status=status.HTTP_501_NOT_IMPLEMENTED

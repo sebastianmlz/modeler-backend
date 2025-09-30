@@ -49,15 +49,6 @@ from ..permissions import IsOrganizationMember
 class OrganizationViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar organizaciones según Fase 1.
-    
-    Endpoints implementados:
-    - W01: POST /api/organizations/ → crear organización
-    - W02: GET /api/organizations/ → listar mis organizaciones  
-    - W03: GET /api/organizations/{id}/ → obtener organización
-    
-    Permisos según matriz Fase 1:
-    - Crear = IsAuthenticated
-    - Listar/Obtener = miembro de la organización
     """
     
     queryset = Organization.objects.all()
@@ -80,9 +71,7 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """
-        Filtrar organizaciones según el usuario.
-        
-        W02: Lista solo organizaciones donde el usuario es miembro.
+        Filtrar organizaciones según el usuario.        
         """
         user = self.request.user
         
@@ -113,21 +102,18 @@ class OrganizationViewSet(viewsets.ModelViewSet):
     
     # Sobrescribir métodos no permitidos en Fase 1
     def update(self, request, *args, **kwargs):
-        """PATCH/PUT no están en el alcance de Fase 1."""
         return Response(
             {"detail": "Actualización de organizaciones no implementada en Fase 1"}, 
             status=status.HTTP_501_NOT_IMPLEMENTED
         )
     
     def partial_update(self, request, *args, **kwargs):
-        """PATCH no está en el alcance de Fase 1.""" 
         return Response(
             {"detail": "Actualización parcial de organizaciones no implementada en Fase 1"},
             status=status.HTTP_501_NOT_IMPLEMENTED
         )
     
     def destroy(self, request, *args, **kwargs):
-        """DELETE no está en el alcance de Fase 1."""
         return Response(
             {"detail": "Eliminación de organizaciones no implementada en Fase 1"},
             status=status.HTTP_501_NOT_IMPLEMENTED
